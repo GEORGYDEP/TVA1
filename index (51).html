@@ -1,0 +1,2652 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TVA Master - La TVA et les Factures</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Serif+Display&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-dark: #0f1119;
+  --bg-card: #181b27;
+  --bg-card-hover: #1e2233;
+  --bg-input: #232738;
+  --accent-blue: #4f8cff;
+  --accent-green: #34d399;
+  --accent-red: #f87171;
+  --accent-orange: #fb923c;
+  --accent-purple: #a78bfa;
+  --accent-yellow: #fbbf24;
+  --accent-teal: #2dd4bf;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border: #2a2f42;
+  --border-light: #353b52;
+  --success-bg: rgba(52, 211, 153, 0.1);
+  --error-bg: rgba(248, 113, 113, 0.1);
+  --shadow-lg: 0 20px 40px rgba(0,0,0,0.4);
+  --radius: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Space Grotesk', sans-serif;
+  background: var(--bg-dark);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Background pattern */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: 
+    radial-gradient(ellipse at 20% 0%, rgba(79,140,255,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 100%, rgba(167,139,250,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse at 50% 50%, rgba(45,212,191,0.03) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-dark); }
+::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+@keyframes confettiBurst {
+  0% { transform: scale(0) rotate(0deg); opacity: 1; }
+  100% { transform: scale(1.5) rotate(720deg); opacity: 0; }
+}
+@keyframes scorePopIn {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes starSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-in {
+  animation: fadeInUp 0.5s ease-out forwards;
+  opacity: 0;
+}
+.animate-delay-1 { animation-delay: 0.1s; }
+.animate-delay-2 { animation-delay: 0.2s; }
+.animate-delay-3 { animation-delay: 0.3s; }
+.animate-delay-4 { animation-delay: 0.4s; }
+.animate-delay-5 { animation-delay: 0.5s; }
+
+/* ===== LAYOUT ===== */
+.app-container {
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  min-height: 100vh;
+}
+
+/* ===== HEADER ===== */
+.app-header {
+  text-align: center;
+  padding: 40px 20px 30px;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.app-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.logo-icon {
+  width: 52px;
+  height: 52px;
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  box-shadow: 0 8px 24px rgba(79,140,255,0.3);
+}
+
+.app-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 2.2rem;
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple), var(--accent-teal));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.app-subtitle {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  margin-top: 4px;
+  font-weight: 400;
+}
+
+/* ===== PROGRESS BAR ===== */
+.progress-section {
+  margin: 16px 0 28px;
+  animation: fadeInUp 0.6s ease-out 0.1s forwards;
+  opacity: 0;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 0.85rem;
+}
+
+.progress-label {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.progress-score {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent-yellow);
+  font-weight: 600;
+}
+
+.progress-bar-track {
+  height: 8px;
+  background: var(--bg-input);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+  border-radius: 4px;
+  transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+}
+
+.progress-bar-fill::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  animation: shimmer 2s infinite;
+  background-size: 200% 100%;
+}
+
+.progress-steps {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding: 0 2px;
+}
+
+.progress-step {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--bg-input);
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: all 0.3s ease;
+  cursor: default;
+}
+
+.progress-step.active {
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
+  background: rgba(79,140,255,0.15);
+  box-shadow: 0 0 12px rgba(79,140,255,0.3);
+}
+
+.progress-step.completed {
+  border-color: var(--accent-green);
+  background: var(--accent-green);
+  color: var(--bg-dark);
+}
+
+/* ===== EXERCISE CARDS ===== */
+.exercise-container {
+  display: none;
+}
+.exercise-container.active {
+  display: block;
+}
+
+.exercise-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 32px;
+  margin-bottom: 20px;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.exercise-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 14px;
+}
+
+.badge-blue { background: rgba(79,140,255,0.15); color: var(--accent-blue); }
+.badge-green { background: rgba(52,211,153,0.15); color: var(--accent-green); }
+.badge-orange { background: rgba(251,146,60,0.15); color: var(--accent-orange); }
+.badge-purple { background: rgba(167,139,250,0.15); color: var(--accent-purple); }
+.badge-teal { background: rgba(45,212,191,0.15); color: var(--accent-teal); }
+.badge-yellow { background: rgba(251,191,36,0.15); color: var(--accent-yellow); }
+.badge-red { background: rgba(248,113,113,0.15); color: var(--accent-red); }
+
+.exercise-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.exercise-description {
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+/* ===== THEORY BOX ===== */
+.theory-box {
+  background: linear-gradient(135deg, rgba(79,140,255,0.08), rgba(167,139,250,0.05));
+  border: 1px solid rgba(79,140,255,0.2);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.theory-box h4 {
+  color: var(--accent-blue);
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.theory-box p, .theory-box li {
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  line-height: 1.7;
+}
+
+.theory-box ul {
+  list-style: none;
+  padding: 0;
+}
+
+.theory-box ul li::before {
+  content: '▸ ';
+  color: var(--accent-blue);
+  font-weight: bold;
+}
+
+.formula-highlight {
+  background: rgba(251,191,36,0.1);
+  border: 1px solid rgba(251,191,36,0.25);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 12px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.88rem;
+  color: var(--accent-yellow);
+  text-align: center;
+}
+
+/* ===== INVOICE DISPLAY ===== */
+.invoice-display {
+  background: #ffffff;
+  color: #1a1a2e;
+  border-radius: var(--radius);
+  padding: 24px;
+  margin: 20px 0;
+  font-size: 0.85rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.invoice-display::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+}
+
+.invoice-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.invoice-party { flex: 1; }
+.invoice-party strong {
+  display: block;
+  font-size: 0.95rem;
+  color: #1e293b;
+  margin-bottom: 4px;
+}
+.invoice-party span {
+  display: block;
+  font-size: 0.78rem;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.invoice-meta {
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.invoice-meta strong {
+  color: #334155;
+  font-size: 0.9rem;
+}
+.invoice-meta span {
+  color: #64748b;
+  font-size: 0.82rem;
+  margin-left: 8px;
+}
+
+.invoice-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 14px;
+}
+
+.invoice-table th {
+  background: #f1f5f9;
+  color: #475569;
+  padding: 8px 12px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: left;
+  font-weight: 600;
+}
+
+.invoice-table th:last-child,
+.invoice-table td:last-child {
+  text-align: right;
+}
+
+.invoice-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #334155;
+  font-size: 0.84rem;
+}
+
+.invoice-totals {
+  border-top: 2px solid #e2e8f0;
+  padding-top: 10px;
+}
+
+.invoice-totals .row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+.invoice-totals .row.total {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #1e293b;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 8px;
+  margin-top: 4px;
+}
+
+.invoice-conditions {
+  margin-top: 12px;
+  font-size: 0.78rem;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+/* ===== QUESTION BLOCKS ===== */
+.question-block {
+  background: var(--bg-card-hover);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
+}
+
+.question-block.correct {
+  border-color: var(--accent-green);
+  background: var(--success-bg);
+}
+
+.question-block.incorrect {
+  border-color: var(--accent-red);
+  background: var(--error-bg);
+  animation: shake 0.4s ease;
+}
+
+.question-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  background: var(--accent-blue);
+  color: white;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.question-text {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  margin-bottom: 14px;
+  color: var(--text-primary);
+}
+
+.question-text strong {
+  color: var(--accent-yellow);
+}
+
+/* ===== INPUT STYLES ===== */
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.input-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  min-width: 140px;
+}
+
+input[type="number"], input[type="text"], select {
+  background: var(--bg-input);
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  padding: 10px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9rem;
+  width: 160px;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+input:focus, select:focus {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px rgba(79,140,255,0.15);
+}
+
+input.valid {
+  border-color: var(--accent-green) !important;
+  background: rgba(52,211,153,0.08);
+}
+
+input.invalid {
+  border-color: var(--accent-red) !important;
+  background: rgba(248,113,113,0.08);
+}
+
+select {
+  cursor: pointer;
+  width: auto;
+  min-width: 160px;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 01.753 1.659l-4.796 5.48a1 1 0 01-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: calc(100% - 12px) center;
+  padding-right: 34px;
+}
+
+.input-suffix {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* ===== OPTION GRID ===== */
+.options-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.option-btn {
+  background: var(--bg-input);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  color: var(--text-primary);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  font-weight: 500;
+}
+
+.option-btn:hover {
+  border-color: var(--accent-blue);
+  background: rgba(79,140,255,0.08);
+  transform: translateY(-1px);
+}
+
+.option-btn.selected {
+  border-color: var(--accent-blue);
+  background: rgba(79,140,255,0.15);
+  color: var(--accent-blue);
+}
+
+.option-btn.correct-answer {
+  border-color: var(--accent-green) !important;
+  background: rgba(52,211,153,0.15) !important;
+  color: var(--accent-green) !important;
+}
+
+.option-btn.wrong-answer {
+  border-color: var(--accent-red) !important;
+  background: rgba(248,113,113,0.1) !important;
+  color: var(--accent-red) !important;
+}
+
+.option-btn:disabled {
+  cursor: default;
+  opacity: 0.85;
+}
+
+/* ===== RATE CARDS ===== */
+.rate-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.rate-card {
+  text-align: center;
+  padding: 16px 10px;
+  border-radius: var(--radius);
+  border: 2px solid var(--border);
+}
+
+.rate-card.rate-6 {
+  background: rgba(52,211,153,0.08);
+  border-color: rgba(52,211,153,0.3);
+}
+.rate-card.rate-12 {
+  background: rgba(251,146,60,0.08);
+  border-color: rgba(251,146,60,0.3);
+}
+.rate-card.rate-21 {
+  background: rgba(248,113,113,0.08);
+  border-color: rgba(248,113,113,0.3);
+}
+
+.rate-card .rate-value {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+.rate-6 .rate-value { color: var(--accent-green); }
+.rate-12 .rate-value { color: var(--accent-orange); }
+.rate-21 .rate-value { color: var(--accent-red); }
+
+.rate-card .rate-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.rate-card .rate-items {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
+/* ===== DND for Rate Exercise ===== */
+.dnd-items-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0;
+  min-height: 48px;
+  padding: 10px;
+  background: var(--bg-input);
+  border-radius: var(--radius);
+  border: 2px dashed var(--border);
+}
+
+.dnd-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.82rem;
+  cursor: grab;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.dnd-item:hover {
+  border-color: var(--accent-blue);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.dnd-item:active { cursor: grabbing; }
+
+.dnd-item.placed {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.drop-zone {
+  min-height: 60px;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  transition: all 0.2s ease;
+  align-content: flex-start;
+}
+
+.drop-zone.drag-over {
+  border-color: var(--accent-blue);
+  background: rgba(79,140,255,0.05);
+}
+
+.drop-zone .dnd-item {
+  cursor: pointer;
+}
+
+.drop-zone .dnd-item.correct-placed {
+  border-color: var(--accent-green);
+  background: rgba(52,211,153,0.1);
+  color: var(--accent-green);
+}
+
+.drop-zone .dnd-item.incorrect-placed {
+  border-color: var(--accent-red);
+  background: rgba(248,113,113,0.1);
+  color: var(--accent-red);
+}
+
+.drop-zone-label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ===== BUTTONS ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 28px;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+  color: white;
+  box-shadow: 0 4px 16px rgba(79,140,255,0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(79,140,255,0.4);
+}
+
+.btn-secondary {
+  background: var(--bg-input);
+  border: 2px solid var(--border);
+  color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+  border-color: var(--accent-blue);
+  background: rgba(79,140,255,0.08);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, var(--accent-green), var(--accent-teal));
+  color: var(--bg-dark);
+  box-shadow: 0 4px 16px rgba(52,211,153,0.3);
+}
+
+.btn-success:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(52,211,153,0.4);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+  transform: none !important;
+}
+
+.btn-group {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+/* ===== FEEDBACK ===== */
+.feedback {
+  padding: 14px 18px;
+  border-radius: var(--radius);
+  margin-top: 12px;
+  font-size: 0.88rem;
+  display: none;
+  animation: fadeInUp 0.3s ease-out;
+  line-height: 1.6;
+}
+
+.feedback.show { display: block; }
+
+.feedback.success {
+  background: rgba(52,211,153,0.1);
+  border: 1px solid rgba(52,211,153,0.3);
+  color: var(--accent-green);
+}
+
+.feedback.error {
+  background: rgba(248,113,113,0.1);
+  border: 1px solid rgba(248,113,113,0.3);
+  color: var(--accent-red);
+}
+
+.feedback.info {
+  background: rgba(79,140,255,0.1);
+  border: 1px solid rgba(79,140,255,0.3);
+  color: var(--accent-blue);
+}
+
+/* ===== SCORE DISPLAY ===== */
+.score-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  background: var(--bg-card);
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  padding: 40px;
+  text-align: center;
+  z-index: 100;
+  box-shadow: var(--shadow-lg);
+  animation: scorePopIn 0.5s ease-out forwards;
+  max-width: 440px;
+  width: 90%;
+}
+
+.score-popup .score-emoji {
+  font-size: 3.5rem;
+  margin-bottom: 16px;
+  animation: float 2s ease-in-out infinite;
+}
+
+.score-popup .score-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.6rem;
+  margin-bottom: 8px;
+}
+
+.score-popup .score-text {
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  font-size: 0.95rem;
+}
+
+.score-popup .score-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--accent-yellow);
+  margin: 12px 0;
+}
+
+.score-popup .score-stars {
+  font-size: 2rem;
+  margin: 10px 0 20px;
+  letter-spacing: 6px;
+}
+
+.overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 99;
+  display: none;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.overlay.show { display: block; }
+
+/* ===== LANDING PAGE ===== */
+.landing-page {
+  text-align: center;
+  padding: 40px 0;
+}
+
+.landing-emoji {
+  font-size: 4rem;
+  margin-bottom: 20px;
+  animation: float 3s ease-in-out infinite;
+}
+
+.landing-features {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 28px 0;
+  text-align: left;
+}
+
+.feature-card {
+  background: var(--bg-card-hover);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  transition: all 0.2s ease;
+}
+
+.feature-card:hover {
+  border-color: var(--border-light);
+  transform: translateY(-2px);
+}
+
+.feature-card .feature-icon {
+  font-size: 1.4rem;
+  margin-bottom: 6px;
+}
+
+.feature-card .feature-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.feature-card .feature-desc {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* ===== SCHEMA / MECHANISM ===== */
+.mechanism-schema {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+
+.mech-box {
+  background: var(--bg-input);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  text-align: center;
+  min-width: 120px;
+}
+
+.mech-box.highlight {
+  border-color: var(--accent-blue);
+  background: rgba(79,140,255,0.1);
+}
+
+.mech-box .mech-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--accent-yellow);
+}
+
+.mech-box .mech-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mech-operator {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+/* ===== TABLE RECAP ===== */
+.recap-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 0.85rem;
+}
+
+.recap-table th {
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid var(--border);
+}
+
+.recap-table th:last-child,
+.recap-table td:last-child {
+  text-align: right;
+}
+
+.recap-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-primary);
+}
+
+.recap-table tr.total-row {
+  font-weight: 700;
+  background: rgba(79,140,255,0.05);
+}
+
+.recap-table tr.total-row td {
+  border-top: 2px solid var(--accent-blue);
+  color: var(--accent-blue);
+}
+
+.recap-table input {
+  width: 120px;
+}
+
+/* ===== FINAL RESULTS ===== */
+.final-results {
+  text-align: center;
+  padding: 30px 0;
+}
+
+.final-stars {
+  font-size: 3rem;
+  letter-spacing: 8px;
+  margin: 16px 0;
+}
+
+.final-grade {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin: 16px 0;
+}
+
+.final-grade.grade-a { color: var(--accent-green); }
+.final-grade.grade-b { color: var(--accent-blue); }
+.final-grade.grade-c { color: var(--accent-orange); }
+.final-grade.grade-d { color: var(--accent-red); }
+
+.results-breakdown {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  margin: 24px 0;
+}
+
+.result-item {
+  background: var(--bg-card-hover);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+
+.result-item .result-score {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--accent-yellow);
+}
+
+.result-item .result-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 640px) {
+  .app-container { padding: 12px; }
+  .exercise-card { padding: 20px; }
+  .app-title { font-size: 1.6rem; }
+  .exercise-title { font-size: 1.2rem; }
+  .options-grid { grid-template-columns: 1fr; }
+  .landing-features { grid-template-columns: 1fr; }
+  .rate-cards { grid-template-columns: 1fr; }
+  .invoice-header { flex-direction: column; gap: 10px; }
+  .input-row { flex-direction: column; align-items: flex-start; }
+  input[type="number"], input[type="text"], select { width: 100%; }
+  .mechanism-schema { flex-direction: column; }
+  .results-breakdown { grid-template-columns: 1fr 1fr; }
+  .recap-table { font-size: 0.78rem; }
+  .recap-table input { width: 90px; }
+}
+
+/* ===== CONFETTI ===== */
+.confetti-container {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 200;
+  overflow: hidden;
+}
+
+.confetti-piece {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  top: -10px;
+  opacity: 0;
+}
+
+/* ===== MISC ===== */
+.hint-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.hint-btn:hover {
+  color: var(--accent-blue);
+  background: rgba(79,140,255,0.08);
+}
+
+.hint-text {
+  display: none;
+  padding: 10px 14px;
+  background: rgba(79,140,255,0.06);
+  border-radius: 8px;
+  font-size: 0.82rem;
+  color: var(--accent-blue);
+  margin-top: 8px;
+  line-height: 1.5;
+}
+.hint-text.show { display: block; }
+
+.tag-6 { color: var(--accent-green); font-weight: 600; }
+.tag-12 { color: var(--accent-orange); font-weight: 600; }
+.tag-21 { color: var(--accent-red); font-weight: 600; }
+
+.separator {
+  height: 1px;
+  background: var(--border);
+  margin: 20px 0;
+}
+
+.mt-2 { margin-top: 8px; }
+.mt-3 { margin-top: 12px; }
+.mt-4 { margin-top: 16px; }
+.mb-2 { margin-bottom: 8px; }
+.mb-3 { margin-bottom: 12px; }
+.text-center { text-align: center; }
+.text-sm { font-size: 0.85rem; }
+.text-muted { color: var(--text-muted); }
+.font-mono { font-family: 'JetBrains Mono', monospace; }
+</style>
+</head>
+<body>
+
+<div class="app-container" id="app">
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="app-logo">
+      <div class="logo-icon">🧾</div>
+      <div>
+        <h1 class="app-title">TVA Master</h1>
+        <p class="app-subtitle">La TVA et les Factures — Fiche 26</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- PROGRESS -->
+  <div class="progress-section" id="progressSection" style="display:none;">
+    <div class="progress-info">
+      <span class="progress-label" id="progressLabel">Exercice 1/7</span>
+      <span class="progress-score">⭐ <span id="totalScore">0</span> pts</span>
+    </div>
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" id="progressFill" style="width: 0%"></div>
+    </div>
+    <div class="progress-steps" id="progressSteps"></div>
+  </div>
+
+  <!-- ======================== LANDING PAGE ======================== -->
+  <div class="exercise-container active" id="landing">
+    <div class="landing-page">
+      <div class="landing-emoji">🏆</div>
+      <h2 class="exercise-title" style="font-size:1.8rem; margin-bottom:10px;">Prêt à maîtriser la TVA ?</h2>
+      <p class="exercise-description" style="max-width:500px; margin:0 auto;">
+        Parcours 7 exercices progressifs pour devenir un pro de la TVA, des factures et de la comptabilité belge !
+      </p>
+      <div class="landing-features">
+        <div class="feature-card animate-in animate-delay-1">
+          <div class="feature-icon">📋</div>
+          <div class="feature-title">Lire une facture</div>
+          <div class="feature-desc">Identifier les éléments obligatoires</div>
+        </div>
+        <div class="feature-card animate-in animate-delay-2">
+          <div class="feature-icon">🏷️</div>
+          <div class="feature-title">Taux de TVA</div>
+          <div class="feature-desc">6%, 12% ou 21% ? Fais le tri !</div>
+        </div>
+        <div class="feature-card animate-in animate-delay-3">
+          <div class="feature-icon">🧮</div>
+          <div class="feature-title">Calculs de TVA</div>
+          <div class="feature-desc">HTVA → TVA → TVAC</div>
+        </div>
+        <div class="feature-card animate-in animate-delay-4">
+          <div class="feature-icon">🔄</div>
+          <div class="feature-title">Mécanisme TVA</div>
+          <div class="feature-desc">TVA due, déductible et à verser</div>
+        </div>
+        <div class="feature-card animate-in animate-delay-5">
+          <div class="feature-icon">📊</div>
+          <div class="feature-title">Valeur ajoutée</div>
+          <div class="feature-desc">Calculer la richesse créée</div>
+        </div>
+        <div class="feature-card animate-in animate-delay-5">
+          <div class="feature-icon">🎯</div>
+          <div class="feature-title">Défi final</div>
+          <div class="feature-desc">Scénario complet réaliste</div>
+        </div>
+      </div>
+      <div class="btn-group" style="margin-top:32px;">
+        <button class="btn btn-primary" onclick="startGame()" style="padding:16px 40px; font-size:1.05rem;">
+          🚀 Commencer l'aventure
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== EXERCICE 1 : Éléments de la facture ======================== -->
+  <div class="exercise-container" id="ex1">
+    <div class="exercise-card">
+      <span class="exercise-badge badge-blue">📋 Exercice 1</span>
+      <h2 class="exercise-title">Les éléments obligatoires d'une facture</h2>
+      <p class="exercise-description">
+        Une facture est un document commercial obligatoire. Observe la facture ci-dessous et réponds aux questions pour identifier chaque élément.
+      </p>
+
+      <div class="theory-box">
+        <h4>💡 Rappel</h4>
+        <p>Une facture belge doit contenir : l'identification du vendeur et de l'acheteur, un numéro et une date, la description des biens/services, la base imposable (HTVA), le taux et montant de TVA, le total TVAC et les conditions de paiement.</p>
+      </div>
+
+      <div class="invoice-display">
+        <div class="invoice-header">
+          <div class="invoice-party">
+            <strong>BOULANGERIE LAMBERT SRL</strong>
+            <span>Rue de Mons 45 — 7000 Mons<br>TVA : BE 0456.789.123<br>IBAN : BE68 5390 0754 7034</span>
+          </div>
+          <div class="invoice-party" style="text-align:right;">
+            <strong>RESTAURANT LE GOURMET SA</strong>
+            <span>Av. de l'Europe 12 — 6000 Charleroi<br>TVA : BE 0789.321.654</span>
+          </div>
+        </div>
+        <div class="invoice-meta">
+          <strong>Facture n° 2025-042</strong>
+          <span>Date : 10/04/2025</span>
+        </div>
+        <table class="invoice-table">
+          <thead><tr><th>Qté</th><th>Désignation</th><th>P.U.</th><th>Total</th></tr></thead>
+          <tbody>
+            <tr><td>50</td><td>Pains artisanaux</td><td>2,80 €</td><td>140,00 €</td></tr>
+            <tr><td>30</td><td>Croissants au beurre</td><td>1,50 €</td><td>45,00 €</td></tr>
+            <tr><td>20</td><td>Tartes aux fruits (8 parts)</td><td>18,00 €</td><td>360,00 €</td></tr>
+          </tbody>
+        </table>
+        <div class="invoice-totals">
+          <div class="row"><span>Base imposable (HTVA)</span><span>545,00 €</span></div>
+          <div class="row"><span>TVA 6%</span><span>32,70 €</span></div>
+          <div class="row total"><span>TOTAL À PAYER (TVAC)</span><span>577,70 €</span></div>
+        </div>
+        <div class="invoice-conditions">Conditions de paiement : à 30 jours fin de mois</div>
+      </div>
+
+      <div id="ex1Questions">
+        <!-- Q1 -->
+        <div class="question-block" id="ex1q1">
+          <div class="question-text"><span class="question-number">1</span> Qui est le <strong>vendeur</strong> (émetteur) de cette facture ?</div>
+          <div class="options-grid">
+            <button class="option-btn" onclick="checkOption(1,1,this,'a')">Restaurant Le Gourmet SA</button>
+            <button class="option-btn" onclick="checkOption(1,1,this,'b')">Boulangerie Lambert SRL</button>
+            <button class="option-btn" onclick="checkOption(1,1,this,'c')">M. Lambert (particulier)</button>
+            <button class="option-btn" onclick="checkOption(1,1,this,'d')">Administration TVA</button>
+          </div>
+        </div>
+
+        <!-- Q2 -->
+        <div class="question-block" id="ex1q2">
+          <div class="question-text"><span class="question-number">2</span> Quel est le montant de la <strong>base imposable</strong> (HTVA) ?</div>
+          <div class="options-grid">
+            <button class="option-btn" onclick="checkOption(1,2,this,'a')">577,70 €</button>
+            <button class="option-btn" onclick="checkOption(1,2,this,'b')">32,70 €</button>
+            <button class="option-btn" onclick="checkOption(1,2,this,'c')">545,00 €</button>
+            <button class="option-btn" onclick="checkOption(1,2,this,'d')">140,00 €</button>
+          </div>
+        </div>
+
+        <!-- Q3 -->
+        <div class="question-block" id="ex1q3">
+          <div class="question-text"><span class="question-number">3</span> Quel <strong>taux de TVA</strong> est appliqué sur cette facture et pourquoi ?</div>
+          <div class="options-grid">
+            <button class="option-btn" onclick="checkOption(1,3,this,'a')">21% — ce sont des biens de luxe</button>
+            <button class="option-btn" onclick="checkOption(1,3,this,'b')">6% — alimentation de base</button>
+            <button class="option-btn" onclick="checkOption(1,3,this,'c')">12% — restauration</button>
+            <button class="option-btn" onclick="checkOption(1,3,this,'d')">0% — produits exonérés</button>
+          </div>
+        </div>
+
+        <!-- Q4 -->
+        <div class="question-block" id="ex1q4">
+          <div class="question-text"><span class="question-number">4</span> Pour le RESTAURANT LE GOURMET, cette facture est une facture de... ?</div>
+          <div class="options-grid">
+            <button class="option-btn" onclick="checkOption(1,4,this,'a')">Vente</button>
+            <button class="option-btn" onclick="checkOption(1,4,this,'b')">Achat</button>
+            <button class="option-btn" onclick="checkOption(1,4,this,'c')">Crédit</button>
+            <button class="option-btn" onclick="checkOption(1,4,this,'d')">Avoir</button>
+          </div>
+        </div>
+
+        <!-- Q5 -->
+        <div class="question-block" id="ex1q5">
+          <div class="question-text"><span class="question-number">5</span> Pourquoi le numéro de TVA de l'acheteur est-il mentionné sur la facture ?</div>
+          <div class="options-grid">
+            <button class="option-btn" onclick="checkOption(1,5,this,'a')">C'est facultatif</button>
+            <button class="option-btn" onclick="checkOption(1,5,this,'b')">Parce que l'acheteur est un assujetti à la TVA</button>
+            <button class="option-btn" onclick="checkOption(1,5,this,'c')">Pour obtenir une réduction</button>
+            <button class="option-btn" onclick="checkOption(1,5,this,'d')">C'est exigé uniquement pour les exportations</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="feedback" id="ex1Feedback"></div>
+      <div class="btn-group">
+        <button class="btn btn-primary" id="ex1Next" onclick="goToExercise(2)" style="display:none;">Exercice suivant →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== EXERCICE 2 : Taux de TVA (Drag & Drop) ======================== -->
+  <div class="exercise-container" id="ex2">
+    <div class="exercise-card">
+      <span class="exercise-badge badge-green">🏷️ Exercice 2</span>
+      <h2 class="exercise-title">Classe les biens et services par taux de TVA</h2>
+      <p class="exercise-description">
+        En Belgique, il existe 3 taux de TVA. Glisse chaque bien ou service dans la bonne catégorie.
+      </p>
+
+      <div class="rate-cards">
+        <div class="rate-card rate-6">
+          <div class="rate-value">6%</div>
+          <div class="rate-label">Taux réduit</div>
+          <div class="rate-items">Alimentation, eau, médicaments, livres, transport</div>
+        </div>
+        <div class="rate-card rate-12">
+          <div class="rate-value">12%</div>
+          <div class="rate-label">Taux intermédiaire</div>
+          <div class="rate-items">Restaurants, logement social, margarine, hébergement*</div>
+        </div>
+        <div class="rate-card rate-21">
+          <div class="rate-value">21%</div>
+          <div class="rate-label">Taux normal</div>
+          <div class="rate-items">Électronique, vêtements, meubles, véhicules, services</div>
+        </div>
+      </div>
+
+      <p class="text-sm text-muted mb-3">* Depuis le 1er mars 2026, les séjours hôteliers passent de 6% à 12%.</p>
+
+      <div class="dnd-items-container" id="dndSource">
+        <!-- Items will be populated by JS -->
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-top:16px;">
+        <div>
+          <div class="drop-zone-label" style="color:var(--accent-green);">🟢 Zone 6%</div>
+          <div class="drop-zone" id="dropZone6" data-rate="6" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)"></div>
+        </div>
+        <div>
+          <div class="drop-zone-label" style="color:var(--accent-orange);">🟠 Zone 12%</div>
+          <div class="drop-zone" id="dropZone12" data-rate="12" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)"></div>
+        </div>
+        <div>
+          <div class="drop-zone-label" style="color:var(--accent-red);">🔴 Zone 21%</div>
+          <div class="drop-zone" id="dropZone21" data-rate="21" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)"></div>
+        </div>
+      </div>
+
+      <div class="feedback" id="ex2Feedback"></div>
+      <div class="btn-group">
+        <button class="btn btn-secondary" onclick="resetDnD()">🔄 Recommencer</button>
+        <button class="btn btn-primary" id="ex2Check" onclick="checkEx2()">Vérifier mes réponses</button>
+        <button class="btn btn-success" id="ex2Next" onclick="goToExercise(3)" style="display:none;">Exercice suivant →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== EXERCICE 3 : Calculs TVA ======================== -->
+  <div class="exercise-container" id="ex3">
+    <div class="exercise-card">
+      <span class="exercise-badge badge-orange">🧮 Exercice 3</span>
+      <h2 class="exercise-title">Calculs de TVA sur factures</h2>
+      <p class="exercise-description">
+        L'entreprise <strong>ÉLECTRO-SHOP SRL</strong> vend du matériel électronique et informatique. Complète les montants manquants sur ses factures.
+      </p>
+
+      <div class="theory-box">
+        <h4>📐 Formules</h4>
+        <div class="formula-highlight">TVA = Base imposable × Taux</div>
+        <div class="formula-highlight">TVAC = Base imposable + TVA</div>
+        <p class="mt-2">Attention aux arrondis : arrondis au centime le plus proche.</p>
+      </div>
+
+      <!-- Facture A -->
+      <h3 style="font-size:1rem; margin:20px 0 10px; color:var(--accent-blue);">📄 Facture n° 2025-088 — Vente à M. Dupont (particulier)</h3>
+      <div class="question-block" id="ex3q1">
+        <table class="recap-table">
+          <thead><tr><th>Désignation</th><th>HTVA</th><th>Taux</th><th>TVA</th><th>TVAC</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>1 Laptop ASUS 15"</td>
+              <td>849,00 €</td>
+              <td>21%</td>
+              <td><input type="number" step="0.01" id="ex3_1_tva" placeholder="?"></td>
+              <td><input type="number" step="0.01" id="ex3_1_tvac" placeholder="?"></td>
+            </tr>
+            <tr>
+              <td>1 Souris sans fil</td>
+              <td>35,00 €</td>
+              <td>21%</td>
+              <td><input type="number" step="0.01" id="ex3_2_tva" placeholder="?"></td>
+              <td><input type="number" step="0.01" id="ex3_2_tvac" placeholder="?"></td>
+            </tr>
+            <tr>
+              <td>1 Sacoche ordinateur</td>
+              <td>45,50 €</td>
+              <td>21%</td>
+              <td><input type="number" step="0.01" id="ex3_3_tva" placeholder="?"></td>
+              <td><input type="number" step="0.01" id="ex3_3_tvac" placeholder="?"></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="separator"></div>
+        <div class="input-row" style="justify-content:flex-end;">
+          <span class="input-label" style="font-weight:600;">TOTAL Base imposable :</span>
+          <input type="number" step="0.01" id="ex3_total_htva" placeholder="?">
+          <span class="input-suffix">€</span>
+        </div>
+        <div class="input-row" style="justify-content:flex-end;">
+          <span class="input-label" style="font-weight:600;">TOTAL TVA :</span>
+          <input type="number" step="0.01" id="ex3_total_tva" placeholder="?">
+          <span class="input-suffix">€</span>
+        </div>
+        <div class="input-row" style="justify-content:flex-end;">
+          <span class="input-label" style="font-weight:700; color:var(--accent-yellow);">TOTAL À PAYER (TVAC) :</span>
+          <input type="number" step="0.01" id="ex3_total_tvac" placeholder="?" style="border-color:var(--accent-yellow);">
+          <span class="input-suffix">€</span>
+        </div>
+      </div>
+
+      <!-- Facture B -->
+      <h3 style="font-size:1rem; margin:20px 0 10px; color:var(--accent-purple);">📄 Facture n° 2025-015 — Achat chez TECHNO-IMPORT SA</h3>
+      <div class="question-block" id="ex3q2">
+        <p class="text-sm text-muted mb-3">ÉLECTRO-SHOP achète des marchandises à son fournisseur :</p>
+        <table class="recap-table">
+          <thead><tr><th>Désignation</th><th>HTVA</th><th>Taux</th><th>TVA</th><th>TVAC</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>20 Smartphones divers</td>
+              <td>4 200,00 €</td>
+              <td>21%</td>
+              <td><input type="number" step="0.01" id="ex3_4_tva" placeholder="?"></td>
+              <td><input type="number" step="0.01" id="ex3_4_tvac" placeholder="?"></td>
+            </tr>
+            <tr>
+              <td>10 Tablettes</td>
+              <td>2 750,00 €</td>
+              <td>21%</td>
+              <td><input type="number" step="0.01" id="ex3_5_tva" placeholder="?"></td>
+              <td><input type="number" step="0.01" id="ex3_5_tvac" placeholder="?"></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="separator"></div>
+        <div class="input-row" style="justify-content:flex-end;">
+          <span class="input-label" style="font-weight:700; color:var(--accent-yellow);">TOTAL À PAYER (TVAC) :</span>
+          <input type="number" step="0.01" id="ex3_b_total" placeholder="?" style="border-color:var(--accent-yellow);">
+          <span class="input-suffix">€</span>
+        </div>
+      </div>
+
+      <div class="feedback" id="ex3Feedback"></div>
+      <div class="btn-group">
+        <button class="btn btn-primary" id="ex3Check" onclick="checkEx3()">Vérifier mes calculs</button>
+        <button class="btn btn-success" id="ex3Next" onclick="goToExercise(4)" style="display:none;">Exercice suivant →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== EXERCICE 4 : Achat vs Vente ======================== -->
+  <div class="exercise-container" id="ex4">
+    <div class="exercise-card">
+      <span class="exercise-badge badge-purple">📑 Exercice 4</span>
+      <h2 class="exercise-title">Factures d'achat et de vente</h2>
+      <p class="exercise-description">
+        L'entreprise <strong>GARAGE MARTIN SRL</strong> est un concessionnaire automobile. Classe correctement chaque facture et identifie son type.
+      </p>
+
+      <div class="theory-box">
+        <h4>💡 Rappel</h4>
+        <p>Une facture d'<strong>achat</strong> = l'entreprise est le destinataire (elle achète).<br>
+        Une facture de <strong>vente</strong> = l'entreprise est l'émetteur (elle vend).</p>
+      </div>
+
+      <!-- Facture 1 -->
+      <div class="question-block" id="ex4q1">
+        <div class="question-text"><span class="question-number">1</span>
+          <strong>Facture n° V-2025-031</strong> — Émetteur : GARAGE MARTIN SRL → Destinataire : Mme Petit (particulière)<br>
+          <span class="text-sm text-muted">1 Peugeot 208 neuve — HTVA : 18 500,00 € | TVA 21% | TVAC : 22 385,00 €</span>
+        </div>
+        <div class="input-row">
+          <span class="input-label">Type de facture :</span>
+          <select id="ex4_1_type" onchange="checkEx4Progress()">
+            <option value="">— Choisir —</option>
+            <option value="achat">Facture d'achat</option>
+            <option value="vente">Facture de vente</option>
+          </select>
+        </div>
+        <div class="input-row">
+          <span class="input-label">TVA pour GARAGE MARTIN :</span>
+          <select id="ex4_1_tva" onchange="checkEx4Progress()">
+            <option value="">— Choisir —</option>
+            <option value="due">TVA due (sur ventes)</option>
+            <option value="deductible">TVA déductible (sur achats)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Facture 2 -->
+      <div class="question-block" id="ex4q2">
+        <div class="question-text"><span class="question-number">2</span>
+          <strong>Facture n° 2025-1247</strong> — Émetteur : PEUGEOT BELGIQUE SA → Destinataire : GARAGE MARTIN SRL<br>
+          <span class="text-sm text-muted">5 Peugeot 308 neuves — HTVA : 72 500,00 € | TVA 21% : 15 225,00 € | TVAC : 87 725,00 €</span>
+        </div>
+        <div class="input-row">
+          <span class="input-label">Type de facture :</span>
+          <select id="ex4_2_type" onchange="checkEx4Progress()">
+            <option value="">— Choisir —</option>
+            <option value="achat">Facture d'achat</option>
+            <option value="vente">Facture de vente</option>
+          </select>
+        </div>
+        <div class="input-row">
+          <span class="input-label">TVA pour GARAGE MARTIN :</span>
+          <select id="ex4_2_tva" onchange="checkEx4Progress()">
+            <option value="">— Choisir —</option>
+            <option value="due">TVA due (sur ventes)</option>
+            <option value="deductible">TVA déductible (sur achats)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Facture 3 -->
+      <div class="question-block" id="ex4q3">
+        <div class="question-text"><span class="question-number">3</span>
+          <strong>Facture n° V-2025-032</strong> — Émetteur : GARAGE MARTIN SRL → Destinataire : TAXI CHARLEROI SPRL (TVA : BE 0654.321.987)<br>
+          <span class="text-sm text-muted">2 Dacia Sandero — HTVA : 25 400,00 € | TVA 21% : 5 334,00 € | TVAC : 30 734,00 €</span>
+        </div>
+        <div class="input-row">
+          <span class="input-label">Type de facture :</span>
+          <select id="ex4_3_type" onchange="checkEx4Progress()">
+            <option value="">— Choisir —</option>
+            <option value="achat">Facture d'achat</option>
+            <option value="vente">Facture de vente</option>
+          </select>
+        </div>
+        <div class="input-row">
+          <span class="input-label">TVA pour GARAGE MARTIN :</span>
+          <select id="ex4_3_tva" onchange="checkEx4Progress()">
+            <option value="">— Choisir —</option>
+            <option value="due">TVA due (sur ventes)</option>
+            <option value="deductible">TVA déductible (sur achats)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Facture 4 -->
+      <div class="question-block" id="ex4q4">
+        <div class="question-text"><span class="question-number">4</span>
+          <strong>Facture n° EL-2025-890</strong> — Émetteur : ENGIE ELECTRABEL SA → Destinataire : GARAGE MARTIN SRL<br>
+          <span class="text-sm text-muted">Électricité mars 2025 — HTVA : 1 850,00 € | TVA 21% : 388,50 € | TVAC : 2 238,50 €</span>
+        </div>
+        <div class="input-row">
+          <span class="input-label">Type de facture :</span>
+          <select id="ex4_4_type" onchange="checkEx4Progress()">
+            <option value="">— Choisir —</option>
+            <option value="achat">Facture d'achat</option>
+            <option value="vente">Facture de vente</option>
+          </select>
+        </div>
+        <div class="input-row">
+          <span class="input-label">TVA pour GARAGE MARTIN :</span>
+          <select id="ex4_4_tva" onchange="checkEx4Progress()">
+            <option value="">— Choisir —</option>
+            <option value="due">TVA due (sur ventes)</option>
+            <option value="deductible">TVA déductible (sur achats)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="feedback" id="ex4Feedback"></div>
+      <div class="btn-group">
+        <button class="btn btn-primary" id="ex4Check" onclick="checkEx4()">Vérifier mes réponses</button>
+        <button class="btn btn-success" id="ex4Next" onclick="goToExercise(5)" style="display:none;">Exercice suivant →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== EXERCICE 5 : TVA à verser ======================== -->
+  <div class="exercise-container" id="ex5">
+    <div class="exercise-card">
+      <span class="exercise-badge badge-teal">🔄 Exercice 5</span>
+      <h2 class="exercise-title">Le mécanisme de la TVA — TVA à verser à l'État</h2>
+      <p class="exercise-description">
+        L'entreprise <strong>FLEURISTE ROSE & LYS SRL</strong> te présente ses factures du mois de mai 2025. Calcule la TVA à verser (ou à récupérer).
+      </p>
+
+      <div class="theory-box">
+        <h4>🔑 Formule clé</h4>
+        <div class="formula-highlight">TVA à verser = TVA sur ventes (due) − TVA sur achats (déductible)</div>
+        <p>Si positif → l'entreprise verse à l'État. Si négatif → l'État rembourse.</p>
+      </div>
+
+      <h3 style="font-size:0.95rem; margin-bottom:12px; color:var(--accent-teal);">📥 Factures d'ACHAT (mai 2025)</h3>
+      <table class="recap-table">
+        <thead><tr><th>Fournisseur</th><th>Description</th><th>HTVA</th><th>Taux</th><th>TVA</th></tr></thead>
+        <tbody>
+          <tr><td>Serres du Hainaut</td><td>Fleurs coupées</td><td>3 200,00 €</td><td>6%</td><td>192,00 €</td></tr>
+          <tr><td>Pot & Déco SA</td><td>Vases et pots déco</td><td>1 450,00 €</td><td>21%</td><td>304,50 €</td></tr>
+          <tr><td>Proximus</td><td>Téléphone + Internet</td><td>89,00 €</td><td>21%</td><td>18,69 €</td></tr>
+        </tbody>
+      </table>
+
+      <h3 style="font-size:0.95rem; margin:20px 0 12px; color:var(--accent-teal);">📤 Factures de VENTE (mai 2025)</h3>
+      <table class="recap-table">
+        <thead><tr><th>Client</th><th>Description</th><th>HTVA</th><th>Taux</th><th>TVA</th></tr></thead>
+        <tbody>
+          <tr><td>Hôtel Métropole SA</td><td>Compositions florales</td><td>4 800,00 €</td><td>21%</td><td>1 008,00 €</td></tr>
+          <tr><td>Mme Devreux (part.)</td><td>Bouquets mariage</td><td>1 250,00 €</td><td>21%</td><td>262,50 €</td></tr>
+          <tr><td>Commune de Mons</td><td>Fleurs événement</td><td>2 100,00 €</td><td>21%</td><td>441,00 €</td></tr>
+        </tbody>
+      </table>
+
+      <div class="separator"></div>
+
+      <div class="question-block" id="ex5q1">
+        <div class="question-text"><span class="question-number">A</span> Calcule le <strong>total de la TVA sur achats</strong> (TVA déductible) :</div>
+        <div class="input-row">
+          <span class="input-label">TVA déductible totale :</span>
+          <input type="number" step="0.01" id="ex5_tva_achats" placeholder="?">
+          <span class="input-suffix">€</span>
+        </div>
+      </div>
+
+      <div class="question-block" id="ex5q2">
+        <div class="question-text"><span class="question-number">B</span> Calcule le <strong>total de la TVA sur ventes</strong> (TVA due) :</div>
+        <div class="input-row">
+          <span class="input-label">TVA due totale :</span>
+          <input type="number" step="0.01" id="ex5_tva_ventes" placeholder="?">
+          <span class="input-suffix">€</span>
+        </div>
+      </div>
+
+      <div class="question-block" id="ex5q3">
+        <div class="question-text"><span class="question-number">C</span> Calcule le <strong>montant de TVA à verser</strong> à l'État :</div>
+        <div class="input-row">
+          <span class="input-label">TVA à verser :</span>
+          <input type="number" step="0.01" id="ex5_tva_verser" placeholder="?">
+          <span class="input-suffix">€</span>
+        </div>
+      </div>
+
+      <div class="question-block" id="ex5q4">
+        <div class="question-text"><span class="question-number">D</span> L'entreprise doit-elle <strong>payer</strong> l'État ou se faire <strong>rembourser</strong> ?</div>
+        <div class="options-grid">
+          <button class="option-btn" onclick="selectEx5D(this, 'payer')">💰 Payer l'État</button>
+          <button class="option-btn" onclick="selectEx5D(this, 'rembourser')">🔙 Se faire rembourser</button>
+        </div>
+      </div>
+
+      <div class="feedback" id="ex5Feedback"></div>
+      <div class="btn-group">
+        <button class="btn btn-primary" id="ex5Check" onclick="checkEx5()">Vérifier mes calculs</button>
+        <button class="btn btn-success" id="ex5Next" onclick="goToExercise(6)" style="display:none;">Exercice suivant →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== EXERCICE 6 : Valeur Ajoutée ======================== -->
+  <div class="exercise-container" id="ex6">
+    <div class="exercise-card">
+      <span class="exercise-badge badge-yellow">📊 Exercice 6</span>
+      <h2 class="exercise-title">La valeur ajoutée</h2>
+      <p class="exercise-description">
+        La valeur ajoutée représente la richesse créée par l'entreprise. C'est sur cette valeur que porte la TVA !
+      </p>
+
+      <div class="theory-box">
+        <h4>📐 Formule</h4>
+        <div class="formula-highlight">Valeur Ajoutée = Total ventes HTVA − Total achats HTVA</div>
+        <p class="mt-2">La TVA à verser devrait correspondre à : Valeur Ajoutée × Taux de TVA</p>
+      </div>
+
+      <p style="margin-bottom:16px;">Reprenons les données de la <strong>FLEURISTE ROSE & LYS SRL</strong> (exercice 5) :</p>
+
+      <div class="mechanism-schema">
+        <div class="mech-box">
+          <div class="mech-value">8 150,00 €</div>
+          <div class="mech-label">Ventes HTVA</div>
+        </div>
+        <div class="mech-operator">−</div>
+        <div class="mech-box">
+          <div class="mech-value">4 739,00 €</div>
+          <div class="mech-label">Achats HTVA</div>
+        </div>
+        <div class="mech-operator">=</div>
+        <div class="mech-box highlight">
+          <div class="mech-value">?</div>
+          <div class="mech-label">Valeur Ajoutée</div>
+        </div>
+      </div>
+
+      <div class="question-block mt-4" id="ex6q1">
+        <div class="question-text"><span class="question-number">1</span> Calcule la <strong>valeur ajoutée</strong> de l'entreprise :</div>
+        <div class="input-row">
+          <span class="input-label">Valeur ajoutée :</span>
+          <input type="number" step="0.01" id="ex6_va" placeholder="?">
+          <span class="input-suffix">€</span>
+        </div>
+      </div>
+
+      <div class="question-block" id="ex6q2">
+        <div class="question-text"><span class="question-number">2</span> Quelle est la <strong>définition</strong> de la valeur ajoutée ?</div>
+        <div class="options-grid">
+          <button class="option-btn" onclick="checkOption(6,2,this,'a')">Le bénéfice net de l'entreprise</button>
+          <button class="option-btn" onclick="checkOption(6,2,this,'b')">La différence entre le prix de vente HTVA et le prix d'achat HTVA</button>
+          <button class="option-btn" onclick="checkOption(6,2,this,'c')">Le total des ventes TVAC</button>
+          <button class="option-btn" onclick="checkOption(6,2,this,'d')">La TVA collectée par l'entreprise</button>
+        </div>
+      </div>
+
+      <div class="question-block" id="ex6q3">
+        <div class="question-text"><span class="question-number">3</span> Pourquoi cet impôt s'appelle-t-il « Taxe sur la <strong>Valeur Ajoutée</strong> » ?</div>
+        <div class="options-grid">
+          <button class="option-btn" onclick="checkOption(6,3,this,'a')">Parce que la TVA taxe le bénéfice de l'entreprise</button>
+          <button class="option-btn" onclick="checkOption(6,3,this,'b')">Parce que la TVA porte sur la richesse créée (valeur ajoutée) à chaque étape</button>
+          <button class="option-btn" onclick="checkOption(6,3,this,'c')">Parce que la TVA augmente le prix des produits</button>
+          <button class="option-btn" onclick="checkOption(6,3,this,'d')">Parce que l'État ajoute une taxe sur le revenu</button>
+        </div>
+      </div>
+
+      <div class="feedback" id="ex6Feedback"></div>
+      <div class="btn-group">
+        <button class="btn btn-primary" id="ex6Check" onclick="checkEx6()">Vérifier mes réponses</button>
+        <button class="btn btn-success" id="ex6Next" onclick="goToExercise(7)" style="display:none;">Exercice suivant →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== EXERCICE 7 : Défi Final ======================== -->
+  <div class="exercise-container" id="ex7">
+    <div class="exercise-card">
+      <span class="exercise-badge badge-red">🎯 Exercice 7 — Défi Final</span>
+      <h2 class="exercise-title">Scénario complet : PIZZERIA DA LUIGI SRL</h2>
+      <p class="exercise-description">
+        Tu es le comptable de la <strong>Pizzeria Da Luigi SRL</strong> à Namur. Voici les factures du mois de juin 2025. Réalise le travail comptable complet !
+      </p>
+
+      <h3 style="font-size:0.95rem; margin-bottom:12px; color:var(--accent-red);">📥 Factures d'ACHAT</h3>
+
+      <div class="invoice-display" style="font-size:0.8rem; padding:18px; margin-bottom:12px;">
+        <div class="invoice-meta">
+          <strong>Facture n° F-2025-412</strong> <span>| MOULIN DU SUD SA → PIZZERIA DA LUIGI SRL</span>
+        </div>
+        <table class="invoice-table">
+          <thead><tr><th>Qté</th><th>Désignation</th><th>P.U.</th><th>Total</th></tr></thead>
+          <tbody>
+            <tr><td>200 kg</td><td>Farine type 00</td><td>1,80 €</td><td>360,00 €</td></tr>
+            <tr><td>50 L</td><td>Huile d'olive extra vierge</td><td>8,50 €</td><td>425,00 €</td></tr>
+            <tr><td>100 kg</td><td>Mozzarella</td><td>7,20 €</td><td>720,00 €</td></tr>
+          </tbody>
+        </table>
+        <div class="invoice-totals">
+          <div class="row"><span>HTVA</span><span>1 505,00 €</span></div>
+          <div class="row"><span>TVA 6%</span><span>90,30 €</span></div>
+          <div class="row total"><span>TVAC</span><span>1 595,30 €</span></div>
+        </div>
+      </div>
+
+      <div class="invoice-display" style="font-size:0.8rem; padding:18px; margin-bottom:12px;">
+        <div class="invoice-meta">
+          <strong>Facture n° 2025-0078</strong> <span>| FOUR PRO BELGIQUE SA → PIZZERIA DA LUIGI SRL</span>
+        </div>
+        <table class="invoice-table">
+          <thead><tr><th>Qté</th><th>Désignation</th><th>P.U.</th><th>Total</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>Four à pizza professionnel</td><td>3 800,00 €</td><td>3 800,00 €</td></tr>
+          </tbody>
+        </table>
+        <div class="invoice-totals">
+          <div class="row"><span>HTVA</span><span>3 800,00 €</span></div>
+          <div class="row"><span>TVA 21%</span><span>798,00 €</span></div>
+          <div class="row total"><span>TVAC</span><span>4 598,00 €</span></div>
+        </div>
+      </div>
+
+      <h3 style="font-size:0.95rem; margin:20px 0 12px; color:var(--accent-red);">📤 Factures de VENTE</h3>
+
+      <div class="invoice-display" style="font-size:0.8rem; padding:18px; margin-bottom:12px;">
+        <div class="invoice-meta">
+          <strong>Facture n° V-2025-061</strong> <span>| PIZZERIA DA LUIGI SRL → HOTEL CITADELLE SA</span>
+        </div>
+        <table class="invoice-table">
+          <thead><tr><th>Qté</th><th>Désignation</th><th>P.U.</th><th>Total</th></tr></thead>
+          <tbody>
+            <tr><td>80</td><td>Pizzas assorties (livraison traiteur)</td><td>12,50 €</td><td>1 000,00 €</td></tr>
+            <tr><td>40</td><td>Desserts tiramisu</td><td>6,00 €</td><td>240,00 €</td></tr>
+          </tbody>
+        </table>
+        <div class="invoice-totals">
+          <div class="row"><span>HTVA</span><span>1 240,00 €</span></div>
+          <div class="row"><span>TVA 12%</span><span>148,80 €</span></div>
+          <div class="row total"><span>TVAC</span><span>1 388,80 €</span></div>
+        </div>
+      </div>
+
+      <div class="invoice-display" style="font-size:0.8rem; padding:18px; margin-bottom:12px;">
+        <div class="invoice-meta">
+          <strong>Facture n° V-2025-062 à 090</strong> <span>| PIZZERIA DA LUIGI SRL → Clients divers (particuliers)</span>
+        </div>
+        <p style="color:#64748b; font-size:0.82rem; padding:8px 0;">Récapitulatif des ventes au comptoir du mois :</p>
+        <div class="invoice-totals">
+          <div class="row"><span>Total ventes nourriture HTVA</span><span>8 400,00 €</span></div>
+          <div class="row"><span>TVA 12%</span><span>1 008,00 €</span></div>
+          <div class="row"><span>Total ventes boissons non-alcool. HTVA</span><span>1 200,00 €</span></div>
+          <div class="row"><span>TVA 12%</span><span>144,00 €</span></div>
+          <div class="row"><span>Total ventes boissons alcoolisées HTVA</span><span>2 600,00 €</span></div>
+          <div class="row"><span>TVA 21%</span><span>546,00 €</span></div>
+          <div class="row total"><span>TOTAL TVAC</span><span>13 898,00 €</span></div>
+        </div>
+      </div>
+
+      <div class="separator"></div>
+
+      <!-- Questions du défi final -->
+      <div class="question-block" id="ex7q1">
+        <div class="question-text"><span class="question-number">1</span> Calcule le <strong>total de la TVA sur achats</strong> (TVA déductible) :</div>
+        <div class="input-row">
+          <span class="input-label">TVA déductible :</span>
+          <input type="number" step="0.01" id="ex7_tva_achats" placeholder="?">
+          <span class="input-suffix">€</span>
+        </div>
+        <button class="hint-btn" onclick="toggleHint('hint7_1')">💡 Indice</button>
+        <div class="hint-text" id="hint7_1">Additionne la TVA des deux factures d'achat : 90,30 + 798,00</div>
+      </div>
+
+      <div class="question-block" id="ex7q2">
+        <div class="question-text"><span class="question-number">2</span> Calcule le <strong>total de la TVA sur ventes</strong> (TVA due) :</div>
+        <div class="input-row">
+          <span class="input-label">TVA due :</span>
+          <input type="number" step="0.01" id="ex7_tva_ventes" placeholder="?">
+          <span class="input-suffix">€</span>
+        </div>
+        <button class="hint-btn" onclick="toggleHint('hint7_2')">💡 Indice</button>
+        <div class="hint-text" id="hint7_2">Additionne toutes les TVA des ventes : 148,80 + 1 008,00 + 144,00 + 546,00</div>
+      </div>
+
+      <div class="question-block" id="ex7q3">
+        <div class="question-text"><span class="question-number">3</span> Calcule le <strong>montant de TVA à verser</strong> à l'État :</div>
+        <div class="input-row">
+          <span class="input-label">TVA à verser :</span>
+          <input type="number" step="0.01" id="ex7_tva_verser" placeholder="?">
+          <span class="input-suffix">€</span>
+        </div>
+      </div>
+
+      <div class="question-block" id="ex7q4">
+        <div class="question-text"><span class="question-number">4</span> Calcule la <strong>valeur ajoutée</strong> de la Pizzeria (total ventes HTVA − total achats HTVA) :</div>
+        <div class="input-row">
+          <span class="input-label">Total ventes HTVA :</span>
+          <input type="number" step="0.01" id="ex7_ventes_htva" placeholder="?">
+          <span class="input-suffix">€</span>
+        </div>
+        <div class="input-row">
+          <span class="input-label">Total achats HTVA :</span>
+          <input type="number" step="0.01" id="ex7_achats_htva" placeholder="?">
+          <span class="input-suffix">€</span>
+        </div>
+        <div class="input-row">
+          <span class="input-label" style="font-weight:700;">Valeur ajoutée :</span>
+          <input type="number" step="0.01" id="ex7_va" placeholder="?">
+          <span class="input-suffix">€</span>
+        </div>
+      </div>
+
+      <div class="question-block" id="ex7q5">
+        <div class="question-text"><span class="question-number">5</span> Pourquoi la vérification VA × taux ne fonctionne pas parfaitement ici ?</div>
+        <div class="options-grid">
+          <button class="option-btn" onclick="checkOption(7,5,this,'a')">Parce qu'il y a une erreur dans les factures</button>
+          <button class="option-btn" onclick="checkOption(7,5,this,'b')">Parce que les achats et ventes ont des taux de TVA différents</button>
+          <button class="option-btn" onclick="checkOption(7,5,this,'c')">Parce que l'État prend une commission</button>
+          <button class="option-btn" onclick="checkOption(7,5,this,'d')">Parce que la TVA n'est pas un impôt proportionnel</button>
+        </div>
+      </div>
+
+      <div class="feedback" id="ex7Feedback"></div>
+      <div class="btn-group">
+        <button class="btn btn-primary" id="ex7Check" onclick="checkEx7()">Vérifier le défi final</button>
+        <button class="btn btn-success" id="ex7Next" onclick="showFinalResults()" style="display:none;">🏆 Voir mes résultats</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== FINAL RESULTS ======================== -->
+  <div class="exercise-container" id="finalResults">
+    <div class="exercise-card">
+      <div class="final-results" id="finalContent">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Overlay for popups -->
+<div class="overlay" id="overlay"></div>
+<div class="confetti-container" id="confettiContainer"></div>
+
+<script>
+// ===== GAME STATE =====
+const TOTAL_EXERCISES = 7;
+let currentExercise = 0;
+let scores = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 };
+let maxScores = { 1: 5, 2: 10, 3: 9, 4: 8, 5: 4, 6: 3, 7: 5 };
+let exerciseCompleted = {};
+let ex1Answers = {};
+let ex5DChoice = null;
+let ex6Answers = {};
+
+// ===== CORRECT ANSWERS =====
+const ex1Correct = { 1: 'b', 2: 'c', 3: 'b', 4: 'b', 5: 'b' };
+const ex6Correct = { 2: 'b', 3: 'b' };
+const ex7Correct = { 5: 'b' };
+
+// ===== DND DATA =====
+const dndItems = [
+  { id: 'dnd1', text: 'Pain de ménage', rate: '6' },
+  { id: 'dnd2', text: 'Smartphone Samsung', rate: '21' },
+  { id: 'dnd3', text: 'Repas au restaurant', rate: '12' },
+  { id: 'dnd4', text: 'Billet de train', rate: '6' },
+  { id: 'dnd5', text: 'Canapé en cuir', rate: '21' },
+  { id: 'dnd6', text: 'Médicaments prescrits', rate: '6' },
+  { id: 'dnd7', text: 'Coupe de cheveux', rate: '21' },
+  { id: 'dnd8', text: 'Livre scolaire', rate: '6' },
+  { id: 'dnd9', text: 'Nuit d\'hôtel (2026)', rate: '12' },
+  { id: 'dnd10', text: 'Télévision 55"', rate: '21' },
+];
+
+// ===== INIT =====
+function startGame() {
+  document.getElementById('landing').classList.remove('active');
+  document.getElementById('progressSection').style.display = 'block';
+  initProgressSteps();
+  goToExercise(1);
+}
+
+function initProgressSteps() {
+  const container = document.getElementById('progressSteps');
+  container.innerHTML = '';
+  for (let i = 1; i <= TOTAL_EXERCISES; i++) {
+    const step = document.createElement('div');
+    step.className = 'progress-step';
+    step.id = `step${i}`;
+    step.textContent = i;
+    container.appendChild(step);
+  }
+}
+
+function updateProgress() {
+  const completed = Object.keys(exerciseCompleted).length;
+  const pct = (completed / TOTAL_EXERCISES) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `Exercice ${currentExercise}/${TOTAL_EXERCISES}`;
+
+  let total = 0;
+  for (let k in scores) total += scores[k];
+  document.getElementById('totalScore').textContent = total;
+
+  for (let i = 1; i <= TOTAL_EXERCISES; i++) {
+    const step = document.getElementById(`step${i}`);
+    step.className = 'progress-step';
+    if (exerciseCompleted[i]) step.classList.add('completed');
+    else if (i === currentExercise) step.classList.add('active');
+  }
+}
+
+function goToExercise(num) {
+  document.querySelectorAll('.exercise-container').forEach(c => c.classList.remove('active'));
+  currentExercise = num;
+  document.getElementById(`ex${num}`).classList.add('active');
+  updateProgress();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  if (num === 2) initDnD();
+}
+
+function getTotalScore() {
+  let total = 0;
+  for (let k in scores) total += scores[k];
+  return total;
+}
+
+function getMaxScore() {
+  let total = 0;
+  for (let k in maxScores) total += maxScores[k];
+  return total;
+}
+
+// ===== FEEDBACK HELPER =====
+function showFeedback(id, type, text) {
+  const fb = document.getElementById(id);
+  fb.className = `feedback show ${type}`;
+  fb.innerHTML = text;
+}
+
+// ===== HINT TOGGLE =====
+function toggleHint(id) {
+  document.getElementById(id).classList.toggle('show');
+}
+
+// ===== EXERCISE 1 : QCM Facture =====
+function checkOption(ex, q, btn, answer) {
+  const correctAnswers = { 1: ex1Correct, 6: ex6Correct, 7: ex7Correct };
+  const correct = correctAnswers[ex][q];
+  const block = btn.closest('.question-block');
+  const buttons = block.querySelectorAll('.option-btn');
+
+  buttons.forEach(b => {
+    b.disabled = true;
+    b.classList.remove('selected');
+  });
+
+  if (answer === correct) {
+    btn.classList.add('correct-answer');
+    block.classList.add('correct');
+    scores[ex]++;
+  } else {
+    btn.classList.add('wrong-answer');
+    block.classList.add('incorrect');
+    // Highlight correct
+    const idx = ['a','b','c','d'].indexOf(correct);
+    buttons[idx].classList.add('correct-answer');
+  }
+
+  if (ex === 1) {
+    ex1Answers[q] = answer;
+    if (Object.keys(ex1Answers).length === 5) {
+      exerciseCompleted[1] = true;
+      showFeedback('ex1Feedback', scores[1] >= 4 ? 'success' : 'info',
+        `${scores[1] >= 4 ? '🎉 Excellent !' : '📝 Pas mal !'} Tu as obtenu <strong>${scores[1]}/5</strong> bonnes réponses. ${scores[1] < 5 ? 'Revois bien les éléments d\'une facture.' : 'Tu maîtrises parfaitement la lecture d\'une facture !'}`);
+      document.getElementById('ex1Next').style.display = '';
+      updateProgress();
+    }
+  }
+
+  if (ex === 6) {
+    ex6Answers[q] = answer;
+    checkEx6Completion();
+  }
+}
+
+// ===== EXERCISE 2 : DnD Taux TVA =====
+let draggedItem = null;
+
+function initDnD() {
+  const source = document.getElementById('dndSource');
+  source.innerHTML = '';
+  document.getElementById('dropZone6').innerHTML = '';
+  document.getElementById('dropZone12').innerHTML = '';
+  document.getElementById('dropZone21').innerHTML = '';
+
+  const shuffled = [...dndItems].sort(() => Math.random() - 0.5);
+  shuffled.forEach(item => {
+    const el = document.createElement('div');
+    el.className = 'dnd-item';
+    el.textContent = item.text;
+    el.draggable = true;
+    el.dataset.id = item.id;
+    el.dataset.rate = item.rate;
+    el.addEventListener('dragstart', handleDragStart);
+    el.addEventListener('dragend', handleDragEnd);
+    // Touch support: click to select, then click zone
+    el.addEventListener('click', () => handleItemClick(el));
+    source.appendChild(el);
+  });
+}
+
+function handleItemClick(el) {
+  if (el.classList.contains('placed')) return;
+  document.querySelectorAll('.dnd-item.selected-touch').forEach(e => e.classList.remove('selected-touch'));
+  el.classList.add('selected-touch');
+  el.style.outline = '2px solid var(--accent-blue)';
+  draggedItem = el;
+
+  // Allow clicking on drop zones
+  document.querySelectorAll('.drop-zone').forEach(zone => {
+    zone.onclick = () => {
+      if (!draggedItem) return;
+      const clone = draggedItem.cloneNode(true);
+      clone.draggable = false;
+      clone.classList.remove('selected-touch');
+      clone.style.outline = '';
+      clone.dataset.id = draggedItem.dataset.id;
+      clone.dataset.rate = draggedItem.dataset.rate;
+      clone.addEventListener('click', () => {
+        // Return to source
+        zone.removeChild(clone);
+        draggedItem.classList.remove('placed');
+        draggedItem.style.outline = '';
+        draggedItem.style.opacity = '1';
+      });
+      zone.appendChild(clone);
+      draggedItem.classList.add('placed');
+      draggedItem.style.outline = '';
+      draggedItem.style.opacity = '0.4';
+      draggedItem = null;
+      document.querySelectorAll('.drop-zone').forEach(z => z.onclick = null);
+    };
+  });
+}
+
+function handleDragStart(e) {
+  draggedItem = e.target;
+  e.target.style.opacity = '0.5';
+  e.dataTransfer.effectAllowed = 'move';
+}
+
+function handleDragEnd(e) {
+  e.target.style.opacity = draggedItem?.classList.contains('placed') ? '0.4' : '1';
+}
+
+function handleDragOver(e) {
+  e.preventDefault();
+  e.currentTarget.classList.add('drag-over');
+}
+
+function handleDragLeave(e) {
+  e.currentTarget.classList.remove('drag-over');
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  if (!draggedItem) return;
+
+  const clone = draggedItem.cloneNode(true);
+  clone.draggable = false;
+  clone.dataset.id = draggedItem.dataset.id;
+  clone.dataset.rate = draggedItem.dataset.rate;
+  clone.addEventListener('click', () => {
+    e.currentTarget.removeChild(clone);
+    draggedItem.classList.remove('placed');
+    draggedItem.style.opacity = '1';
+  });
+
+  e.currentTarget.appendChild(clone);
+  draggedItem.classList.add('placed');
+  draggedItem.style.opacity = '0.4';
+}
+
+function resetDnD() {
+  initDnD();
+  document.getElementById('ex2Feedback').className = 'feedback';
+  document.getElementById('ex2Check').style.display = '';
+  document.getElementById('ex2Next').style.display = 'none';
+  scores[2] = 0;
+}
+
+function checkEx2() {
+  let correct = 0;
+  const zones = { '6': 'dropZone6', '12': 'dropZone12', '21': 'dropZone21' };
+
+  for (const [rate, zoneId] of Object.entries(zones)) {
+    const zone = document.getElementById(zoneId);
+    const items = zone.querySelectorAll('.dnd-item');
+    items.forEach(item => {
+      if (item.dataset.rate === rate) {
+        correct++;
+        item.classList.add('correct-placed');
+      } else {
+        item.classList.add('incorrect-placed');
+      }
+    });
+  }
+
+  // Check if all items placed
+  const totalPlaced = document.querySelectorAll('.drop-zone .dnd-item').length;
+  if (totalPlaced < 10) {
+    showFeedback('ex2Feedback', 'error', '⚠️ Place tous les éléments avant de vérifier ! Il en manque ' + (10 - totalPlaced) + '.');
+    return;
+  }
+
+  scores[2] = correct;
+  exerciseCompleted[2] = true;
+
+  showFeedback('ex2Feedback', correct >= 8 ? 'success' : 'info',
+    `${correct >= 8 ? '🎉 Bravo !' : '📝 Continue !'} Tu as classé correctement <strong>${correct}/10</strong> éléments.${correct < 10 ? ' Les éléments en rouge sont mal placés.' : ' Parfait !'}`);
+
+  document.getElementById('ex2Check').style.display = 'none';
+  document.getElementById('ex2Next').style.display = '';
+  updateProgress();
+}
+
+// ===== EXERCISE 3 : Calculs TVA =====
+function checkEx3() {
+  let correct = 0;
+  const checks = [
+    { id: 'ex3_1_tva', expected: 178.29 },
+    { id: 'ex3_1_tvac', expected: 1027.29 },
+    { id: 'ex3_2_tva', expected: 7.35 },
+    { id: 'ex3_2_tvac', expected: 42.35 },
+    { id: 'ex3_3_tva', expected: 9.56 },
+    { id: 'ex3_3_tvac', expected: 55.06 },
+    { id: 'ex3_total_htva', expected: 929.50 },
+    { id: 'ex3_total_tva', expected: 195.20 },
+    { id: 'ex3_total_tvac', expected: 1124.70 },
+    { id: 'ex3_4_tva', expected: 882.00 },
+    { id: 'ex3_4_tvac', expected: 5082.00 },
+    { id: 'ex3_5_tva', expected: 577.50 },
+    { id: 'ex3_5_tvac', expected: 3327.50 },
+    { id: 'ex3_b_total', expected: 8409.50 },
+  ];
+
+  // Accept tolerance of 0.01 for rounding
+  checks.forEach(c => {
+    const input = document.getElementById(c.id);
+    const val = parseFloat(input.value);
+    if (!isNaN(val) && Math.abs(val - c.expected) <= 0.02) {
+      input.classList.add('valid');
+      input.classList.remove('invalid');
+      correct++;
+    } else {
+      input.classList.add('invalid');
+      input.classList.remove('valid');
+    }
+  });
+
+  // Score out of 9 (group some)
+  const score = Math.round((correct / 14) * 9);
+  scores[3] = score;
+  exerciseCompleted[3] = true;
+
+  let details = '';
+  if (correct < 14) {
+    details = '<br>Les champs en rouge contiennent des erreurs. Rappel : TVA = HTVA × 21% et TVAC = HTVA + TVA.';
+  }
+
+  showFeedback('ex3Feedback', correct >= 10 ? 'success' : 'info',
+    `${correct >= 10 ? '🎉 Excellent travail !' : '📝 Bon effort !'} <strong>${correct}/14</strong> montants corrects.${details}`);
+
+  document.getElementById('ex3Check').style.display = 'none';
+  document.getElementById('ex3Next').style.display = '';
+  updateProgress();
+}
+
+// ===== EXERCISE 4 : Achat vs Vente =====
+const ex4Correct = {
+  '1_type': 'vente', '1_tva': 'due',
+  '2_type': 'achat', '2_tva': 'deductible',
+  '3_type': 'vente', '3_tva': 'due',
+  '4_type': 'achat', '4_tva': 'deductible'
+};
+
+function checkEx4Progress() {}
+
+function checkEx4() {
+  let correct = 0;
+  for (let i = 1; i <= 4; i++) {
+    const typeEl = document.getElementById(`ex4_${i}_type`);
+    const tvaEl = document.getElementById(`ex4_${i}_tva`);
+    const block = document.getElementById(`ex4q${i}`);
+
+    const typeOk = typeEl.value === ex4Correct[`${i}_type`];
+    const tvaOk = tvaEl.value === ex4Correct[`${i}_tva`];
+
+    if (typeOk) { correct++; typeEl.classList.add('valid'); typeEl.classList.remove('invalid'); }
+    else { typeEl.classList.add('invalid'); typeEl.classList.remove('valid'); }
+
+    if (tvaOk) { correct++; tvaEl.classList.add('valid'); tvaEl.classList.remove('invalid'); }
+    else { tvaEl.classList.add('invalid'); tvaEl.classList.remove('valid'); }
+
+    block.classList.remove('correct', 'incorrect');
+    block.classList.add(typeOk && tvaOk ? 'correct' : 'incorrect');
+  }
+
+  scores[4] = correct;
+  exerciseCompleted[4] = true;
+
+  showFeedback('ex4Feedback', correct >= 6 ? 'success' : 'info',
+    `${correct >= 6 ? '🎉 Bravo !' : '📝 Revois les factures.'} <strong>${correct}/8</strong> réponses correctes.${correct < 8 ? '<br>Rappel : si l\'entreprise est l\'émetteur → vente (TVA due). Si elle est le destinataire → achat (TVA déductible).' : ''}`);
+
+  document.getElementById('ex4Check').style.display = 'none';
+  document.getElementById('ex4Next').style.display = '';
+  updateProgress();
+}
+
+// ===== EXERCISE 5 : TVA à verser =====
+function selectEx5D(btn, choice) {
+  btn.closest('.options-grid').querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  ex5DChoice = choice;
+}
+
+function checkEx5() {
+  let correct = 0;
+  const checks = [
+    { id: 'ex5_tva_achats', expected: 515.19 },
+    { id: 'ex5_tva_ventes', expected: 1711.50 },
+    { id: 'ex5_tva_verser', expected: 1196.31 },
+  ];
+
+  checks.forEach((c, i) => {
+    const input = document.getElementById(c.id);
+    const val = parseFloat(input.value);
+    const block = document.getElementById(`ex5q${i + 1}`);
+    if (!isNaN(val) && Math.abs(val - c.expected) <= 0.02) {
+      input.classList.add('valid');
+      input.classList.remove('invalid');
+      block.classList.add('correct');
+      block.classList.remove('incorrect');
+      correct++;
+    } else {
+      input.classList.add('invalid');
+      input.classList.remove('valid');
+      block.classList.add('incorrect');
+      block.classList.remove('correct');
+    }
+  });
+
+  // Check D
+  const block4 = document.getElementById('ex5q4');
+  if (ex5DChoice === 'payer') {
+    correct++;
+    block4.classList.add('correct');
+    block4.querySelectorAll('.option-btn').forEach(b => {
+      b.disabled = true;
+      if (b.textContent.includes('Payer')) b.classList.add('correct-answer');
+    });
+  } else {
+    block4.classList.add('incorrect');
+    block4.querySelectorAll('.option-btn').forEach(b => {
+      b.disabled = true;
+      if (b.textContent.includes('Payer')) b.classList.add('correct-answer');
+      if (b.textContent.includes('Rembourser') && b.classList.contains('selected')) b.classList.add('wrong-answer');
+    });
+  }
+
+  scores[5] = correct;
+  exerciseCompleted[5] = true;
+
+  showFeedback('ex5Feedback', correct >= 3 ? 'success' : 'info',
+    `${correct >= 3 ? '🎉 Super !' : '📝 Vérifie tes calculs.'} <strong>${correct}/4</strong> réponses correctes.${correct < 4 ? '<br>TVA achats = 192 + 304,50 + 18,69 = 515,19 €<br>TVA ventes = 1 008 + 262,50 + 441 = 1 711,50 €<br>À verser = 1 711,50 − 515,19 = 1 196,31 €' : ''}`);
+
+  document.getElementById('ex5Check').style.display = 'none';
+  document.getElementById('ex5Next').style.display = '';
+  updateProgress();
+}
+
+// ===== EXERCISE 6 : Valeur Ajoutée =====
+function checkEx6() {
+  let correct = scores[6]; // Already counted from QCM
+
+  const vaInput = document.getElementById('ex6_va');
+  const val = parseFloat(vaInput.value);
+  const block = document.getElementById('ex6q1');
+
+  if (!isNaN(val) && Math.abs(val - 3411) <= 1) {
+    vaInput.classList.add('valid');
+    block.classList.add('correct');
+    correct++;
+  } else {
+    vaInput.classList.add('invalid');
+    block.classList.add('incorrect');
+  }
+
+  scores[6] = correct;
+  checkEx6Completion();
+}
+
+function checkEx6Completion() {
+  const vaInput = document.getElementById('ex6_va');
+  const vaAnswered = vaInput.classList.contains('valid') || vaInput.classList.contains('invalid');
+  const q2Answered = ex6Answers[2] !== undefined;
+  const q3Answered = ex6Answers[3] !== undefined;
+
+  if (vaAnswered && q2Answered && q3Answered) {
+    exerciseCompleted[6] = true;
+    showFeedback('ex6Feedback', scores[6] >= 2 ? 'success' : 'info',
+      `${scores[6] >= 2 ? '🎉 Bravo !' : '📝 Revois la théorie.'} <strong>${scores[6]}/3</strong> réponses correctes.${scores[6] < 3 ? '<br>VA = 8 150 − 4 739 = 3 411 €. La TVA porte sur la valeur ajoutée à chaque étape de la chaîne économique.' : ' La TVA tire son nom de la valeur ajoutée : la richesse créée par l\'entreprise.'}`);
+    document.getElementById('ex6Check').style.display = 'none';
+    document.getElementById('ex6Next').style.display = '';
+    updateProgress();
+  }
+}
+
+// ===== EXERCISE 7 : Défi Final =====
+function checkEx7() {
+  let correct = scores[7]; // From QCM q5
+  const checks = [
+    { id: 'ex7_tva_achats', expected: 888.30 },
+    { id: 'ex7_tva_ventes', expected: 1846.80 },
+    { id: 'ex7_tva_verser', expected: 958.50 },
+    { id: 'ex7_ventes_htva', expected: 13440.00 },
+    { id: 'ex7_achats_htva', expected: 5305.00 },
+    { id: 'ex7_va', expected: 8135.00 },
+  ];
+
+  checks.forEach((c, i) => {
+    const input = document.getElementById(c.id);
+    const val = parseFloat(input.value);
+    if (!isNaN(val) && Math.abs(val - c.expected) <= 0.02) {
+      input.classList.add('valid');
+      input.classList.remove('invalid');
+      if (i < 3) correct++;
+    } else {
+      input.classList.add('invalid');
+      input.classList.remove('valid');
+    }
+  });
+
+  // Check VA inputs separately (bonus point for getting all 3 VA right)
+  const vhtva = parseFloat(document.getElementById('ex7_ventes_htva').value);
+  const ahtva = parseFloat(document.getElementById('ex7_achats_htva').value);
+  const va = parseFloat(document.getElementById('ex7_va').value);
+  if (!isNaN(vhtva) && Math.abs(vhtva - 13440) <= 1 &&
+      !isNaN(ahtva) && Math.abs(ahtva - 5305) <= 1 &&
+      !isNaN(va) && Math.abs(va - 8135) <= 1) {
+    correct++;
+  }
+
+  scores[7] = Math.min(correct, 5);
+  exerciseCompleted[7] = true;
+
+  const total = correct;
+  showFeedback('ex7Feedback', total >= 4 ? 'success' : 'info',
+    `${total >= 4 ? '🏆 Félicitations pour ce défi final !' : '📝 Bon travail !'} <strong>${scores[7]}/5</strong> points obtenus.`);
+
+  document.getElementById('ex7Check').style.display = 'none';
+  document.getElementById('ex7Next').style.display = '';
+  updateProgress();
+}
+
+// ===== FINAL RESULTS =====
+function showFinalResults() {
+  document.querySelectorAll('.exercise-container').forEach(c => c.classList.remove('active'));
+  document.getElementById('finalResults').classList.add('active');
+
+  const total = getTotalScore();
+  const max = getMaxScore();
+  const pct = Math.round((total / max) * 100);
+
+  let emoji, title, grade, gradeClass;
+  if (pct >= 90) { emoji = '🏆'; title = 'Exceptionnel !'; grade = 'A+'; gradeClass = 'grade-a'; }
+  else if (pct >= 75) { emoji = '🌟'; title = 'Très bien !'; grade = 'A'; gradeClass = 'grade-a'; }
+  else if (pct >= 60) { emoji = '👏'; title = 'Bien joué !'; grade = 'B'; gradeClass = 'grade-b'; }
+  else if (pct >= 45) { emoji = '💪'; title = 'Pas mal !'; grade = 'C'; gradeClass = 'grade-c'; }
+  else { emoji = '📚'; title = 'Continue à travailler !'; grade = 'D'; gradeClass = 'grade-d'; }
+
+  const stars = '⭐'.repeat(Math.ceil(pct / 20));
+
+  document.getElementById('finalContent').innerHTML = `
+    <div style="animation:float 3s ease-in-out infinite; font-size:4rem;">${emoji}</div>
+    <h2 class="exercise-title" style="font-size:2rem; margin:16px 0 8px;">${title}</h2>
+    <div class="final-stars">${stars}</div>
+    <div class="final-grade ${gradeClass}">${total}/${max}</div>
+    <p class="text-secondary">${pct}% de réussite</p>
+
+    <div class="results-breakdown">
+      <div class="result-item animate-in animate-delay-1">
+        <div class="result-score">${scores[1]}/${maxScores[1]}</div>
+        <div class="result-label">Ex 1 — Facture</div>
+      </div>
+      <div class="result-item animate-in animate-delay-2">
+        <div class="result-score">${scores[2]}/${maxScores[2]}</div>
+        <div class="result-label">Ex 2 — Taux</div>
+      </div>
+      <div class="result-item animate-in animate-delay-3">
+        <div class="result-score">${scores[3]}/${maxScores[3]}</div>
+        <div class="result-label">Ex 3 — Calculs</div>
+      </div>
+      <div class="result-item animate-in animate-delay-4">
+        <div class="result-score">${scores[4]}/${maxScores[4]}</div>
+        <div class="result-label">Ex 4 — Achat/Vente</div>
+      </div>
+      <div class="result-item animate-in animate-delay-5">
+        <div class="result-score">${scores[5]}/${maxScores[5]}</div>
+        <div class="result-label">Ex 5 — Mécanisme</div>
+      </div>
+      <div class="result-item animate-in animate-delay-5">
+        <div class="result-score">${scores[6]}/${maxScores[6]}</div>
+        <div class="result-label">Ex 6 — Val. Ajoutée</div>
+      </div>
+      <div class="result-item animate-in animate-delay-5">
+        <div class="result-score">${scores[7]}/${maxScores[7]}</div>
+        <div class="result-label">Ex 7 — Défi Final</div>
+      </div>
+    </div>
+
+    <div class="theory-box" style="text-align:left; margin-top:20px;">
+      <h4>📝 Ce qu'il faut retenir</h4>
+      <ul>
+        <li>La facture est un document obligatoire avec des éléments précis</li>
+        <li>3 taux de TVA en Belgique : 6%, 12% et 21%</li>
+        <li>TVA = Base imposable × Taux | TVAC = HTVA + TVA</li>
+        <li>L'entreprise est intermédiaire : elle collecte et reverse la TVA</li>
+        <li>TVA à verser = TVA due (ventes) − TVA déductible (achats)</li>
+        <li>Valeur ajoutée = Ventes HTVA − Achats HTVA</li>
+      </ul>
+    </div>
+
+    <div class="btn-group" style="margin-top:24px;">
+      <button class="btn btn-secondary" onclick="restartGame()">🔄 Recommencer</button>
+    </div>
+  `;
+
+  if (pct >= 60) launchConfetti();
+  updateProgress();
+}
+
+function restartGame() {
+  scores = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 };
+  exerciseCompleted = {};
+  ex1Answers = {};
+  ex5DChoice = null;
+  ex6Answers = {};
+
+  // Reset all inputs and classes
+  document.querySelectorAll('input').forEach(i => {
+    i.value = '';
+    i.classList.remove('valid', 'invalid');
+  });
+  document.querySelectorAll('select').forEach(s => {
+    s.selectedIndex = 0;
+    s.classList.remove('valid', 'invalid');
+  });
+  document.querySelectorAll('.question-block').forEach(b => b.classList.remove('correct', 'incorrect'));
+  document.querySelectorAll('.option-btn').forEach(b => {
+    b.disabled = false;
+    b.classList.remove('selected', 'correct-answer', 'wrong-answer');
+  });
+  document.querySelectorAll('.feedback').forEach(f => f.className = 'feedback');
+
+  // Reset check/next buttons
+  for (let i = 1; i <= 7; i++) {
+    const check = document.getElementById(`ex${i}Check`);
+    const next = document.getElementById(`ex${i}Next`);
+    if (check) check.style.display = '';
+    if (next) next.style.display = 'none';
+  }
+
+  document.querySelectorAll('.exercise-container').forEach(c => c.classList.remove('active'));
+  document.getElementById('landing').classList.add('active');
+  document.getElementById('progressSection').style.display = 'none';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ===== CONFETTI =====
+function launchConfetti() {
+  const container = document.getElementById('confettiContainer');
+  const colors = ['#4f8cff', '#a78bfa', '#34d399', '#fbbf24', '#fb923c', '#f87171', '#2dd4bf'];
+
+  for (let i = 0; i < 60; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + '%';
+    piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.width = (Math.random() * 8 + 4) + 'px';
+    piece.style.height = (Math.random() * 8 + 4) + 'px';
+    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+
+    const duration = Math.random() * 2 + 2;
+    const delay = Math.random() * 1;
+    const xDrift = (Math.random() - 0.5) * 200;
+
+    piece.style.animation = `none`;
+    piece.style.opacity = '1';
+    piece.style.transition = `all ${duration}s cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
+
+    container.appendChild(piece);
+
+    requestAnimationFrame(() => {
+      piece.style.transform = `translateY(${window.innerHeight + 100}px) translateX(${xDrift}px) rotate(${Math.random() * 720}deg)`;
+      piece.style.opacity = '0';
+    });
+
+    setTimeout(() => piece.remove(), (duration + delay) * 1000 + 500);
+  }
+}
+</script>
+</body>
+</html>
